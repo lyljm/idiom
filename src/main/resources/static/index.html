@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Show-idiom</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .idiom {
+            width: fit-content;
+            height: 100px;
+            margin: 0 auto;
+            margin-top: 100px;
+            font-size: 0.1px;
+        }
+
+        .show-idiom {
+            animation: sizeChange 5s forwards;
+            /* 应用动画，持续5秒，无限循环 */
+        }
+
+        @keyframes sizeChange {
+            0% {
+                font-size: 0;
+                /* 开始时字体大小为10px */
+            }
+
+            50% {
+                font-size: 50px;
+                /* 中间时字体大小为50px */
+            }
+
+            100% {
+                font-size: 0;
+                /* 结束时字体大小为0，使文字不可见 */
+            }
+        }
+    </style>
+</head>
+
+<body>
+<p class="show-idiom idiom" id="show-idiom">人才辈出</p>
+<script src="./js/jquery.js"></script>
+<script>
+    var messages = ['Hello, World!', 'Hello, World!1', 'Hello, World!2', 'Hello, World!3'];
+    var currentIndex = 0;
+    var animatedText = document.getElementById('show-idiom');
+
+    // 获取词语
+    function getIdiom(index) {
+        $.ajax({
+            url: "http://localhost:8080/idiom",
+            type: "GET", // 请求方式
+            async: true, // 设置为同步请求
+            dataType: "json", // 预服务器返回的数据类型期
+            success: function (data) {
+                messages[index] = data.words;
+            },
+            error: function (xhr, status, error) {
+                // 请求失败时执行的回调函数
+                console.error("Error: " + error);
+            }
+        });
+    }
+
+    // 初始化词典
+    function initMessages() {
+        messages.forEach((value, index) => {
+            getIdiom(index);
+        })
+    }
+
+    //控制动画
+    function updateContentAndAnimate() {
+        animatedText.addEventListener('animationend', function (e) {
+            if (e.animationName === 'sizeChange') {
+                animatedText.classList.remove('show-idiom')
+                animatedText.textContent = messages[currentIndex];
+                setTimeout(() => {
+                    animatedText.classList.add('show-idiom')
+                    getIdiom(currentIndex)
+                    currentIndex = (currentIndex + 1) % messages.length;
+                }, 1000);
+            }
+        });
+    }
+
+    // 初始化
+    function init() {
+        initMessages()
+        updateContentAndAnimate()
+    }
+
+    init()
+
+</script>
+</body>
+
+</html>
